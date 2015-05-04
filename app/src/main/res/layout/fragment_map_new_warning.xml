@@ -19,6 +19,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         >
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:id="@+id/new_warning_map"

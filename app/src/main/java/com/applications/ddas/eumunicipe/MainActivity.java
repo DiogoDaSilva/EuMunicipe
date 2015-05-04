@@ -1,16 +1,16 @@
-package com.aplications.ddas.eumunicipe;
+package com.applications.ddas.eumunicipe;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.SyncStateContract;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -32,13 +32,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -215,7 +217,7 @@ public class MainActivity extends ActionBarActivity
                     break;
 
                 case R.id.new_warning_goto_4_step_button:
-                    fragment = new NewWarningDescriptionFragment();
+                    fragment = new NewWarningFinalCheckFragment();
                     break;
                 default:
                     fragment = new HomeFragment();
@@ -249,10 +251,11 @@ public class MainActivity extends ActionBarActivity
 
 
     public static class NewWarningPhotoFragment extends PlaceholderFragment {
+        static final int REQUEST_TAKE_PHOTO = 1;
+
         private LayoutInflater inflater;
         private ViewGroup container;
-
-        private static final int CAMERA_REQUEST = 1888;
+        private String currentPhotoPath;
         private View newWarningPhotoView;
         private ImageView photoView;
         private Button takePhotoButton;
@@ -274,8 +277,27 @@ public class MainActivity extends ActionBarActivity
             takePhotoButton.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    // Ensure that there's a camera activity to handle the intent
+                    Log.d("PHOTO", "Antes do IF");
+                    if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        // Create the File where the photo should go
+                        File photoFile = null;
+                        try {
+                            photoFile = createImageFile();
+                            Log.d("PHOTO2", photoFile.toString());
+                        } catch (IOException ex) {
+                            // Error occurred while creating the File
+                            Log.d("PHOTO_EX", ex.getLocalizedMessage());
+                        }
+                        // Continue only if the File was successfully created
+                        if (photoFile != null) {
+                            Log.d("PHOTO3", photoFile.toString());
+                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                    Uri.fromFile(photoFile));
+                            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                        }
+                    }
                 }
             });
 
@@ -284,10 +306,46 @@ public class MainActivity extends ActionBarActivity
             return newWarningPhotoView;
         }
 
+        private File createImageFile() throws IOException {
+            // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String imageFileName = "PNG_" + timeStamp + "_";
+            File storageDir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".png",         /* suffix */
+                    storageDir      /* directory */
+            );
+
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = image.getAbsolutePath();
+            return image;
+        }
+
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-                photoView.setImageBitmap(photo);
+            if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+                // Get the dimensions of the View
+                int targetW = photoView.getWidth();
+                int targetH = photoView.getHeight();
+
+                // Get the dimensions of the bitmap
+                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                bmOptions.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+                int photoW = bmOptions.outWidth;
+                int photoH = bmOptions.outHeight;
+
+                // Determine how much to scale down the image
+                int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+                // Decode the image file into a Bitmap sized to fill the View
+                bmOptions.inJustDecodeBounds = false;
+                bmOptions.inSampleSize = scaleFactor;
+                bmOptions.inPurgeable = true;
+
+                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+                photoView.setImageBitmap(bitmap);
                 takePhotoButton.setText(R.string.new_warning_take_another_photo);
                 secondStepLayout.setVisibility(View.VISIBLE);
             }
@@ -440,6 +498,66 @@ public class MainActivity extends ActionBarActivity
             forthStepButton.setOnClickListener(this);
 
             return newWarningDescriptionView;
+        }
+    }
+
+
+
+
+
+    public static class NewWarningFinalCheckFragment extends MainActivity.PlaceholderFragment
+            implements OnMapReadyCallback {
+
+        private View newWarningFinalCheckView;
+        private ImageView newWarningPhoto;
+        private SupportMapFragment mapFragment;
+        private GoogleMap googleMap;
+        private EditText newWarningFinalCheckEditEmail;
+        private EditText newWarningFinalCheckEditDescription;
+        private Button sendButton;
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+
+            newWarningFinalCheckView = inflater.inflate(R.layout.fragment_new_warning_final_check,
+                    container, false);
+
+            newWarningPhoto = (ImageView) newWarningFinalCheckView.findViewById(
+                    R.id.final_check_photo);
+
+            newWarningFinalCheckEditEmail = (EditText) newWarningFinalCheckView.findViewById(
+                    R.id.new_warning_final_check_edit_email);
+
+            newWarningFinalCheckEditDescription = (EditText) newWarningFinalCheckView.findViewById(
+                    R.id.new_warning_final_check_edit_description);
+
+
+            try {
+                initializeMap();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return newWarningFinalCheckView;
+        }
+
+        private void initializeMap() {
+            if (googleMap == null) {
+                for(Fragment f : getChildFragmentManager().getFragments()) {
+                    Log.d("debug", "" + f.getId() + " " + f.toString());
+                }
+                SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager()
+                        .findFragmentById(R.id.new_warning_map);
+                mapFragment = supportMapFragment;
+                googleMap = mapFragment.getMap();
+                mapFragment.getMapAsync(this);
+            }
+        }
+
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            Log.d("DebugMap", "Entrei");
         }
     }
 }

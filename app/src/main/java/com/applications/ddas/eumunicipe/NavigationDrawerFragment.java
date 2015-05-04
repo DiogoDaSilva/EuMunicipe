@@ -1,4 +1,4 @@
-package com.aplications.ddas.eumunicipe;
+package com.applications.ddas.eumunicipe;
 
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.aplications.ddas.eumunicipe"
+        applicationId "com.applications.ddas.eumunicipe"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1

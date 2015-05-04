@@ -1,4 +1,4 @@
-package com.aplications.ddas.eumunicipe;
+package com.applications.ddas.eumunicipe;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -13,6 +13,9 @@
 
     <string name="action_settings">Settings</string>
 
+    <string name="filename">currentPhoto.png</string>
+
+
 
     <string name="step_1_take_photo">1º Passo - Tirar uma foto</string>
     <string name="new_warning_take_photo">Tirar Foto</string>
@@ -28,6 +31,14 @@
     <string name="step_3_description_title">Breve descrição do problema.</string>
 
     <string name="new_warning_goto_4_step">4º Passo</string>
+    <string name="step_4_final_check">4º Passo - Finalizar</string>
+    <string name="step_4_photo_title">Foto:</string>
+    <string name="step_4_map_title">Local:</string>
+    <string name="step_4_description_title">Descrição:</string>
+    <string name="step_4_email_title">Email do município:</string>
+    <string name="step_4_send_button">Enviar</string>
+
+
 
 
 </resources>
