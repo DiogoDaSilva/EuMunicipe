@@ -1,10 +1,30 @@
 <resources>
     <string name="app_name">EuMunícipe</string>
 
+    <!-- Content Description -->
+    <string name="desc_list_item_icon">Item Icon</string>
+
     <string name="title_section_home">EuMunícipe</string>
     <string name="title_section_new_warning">Novo Aviso</string>
     <string name="title_section_history">Histórico</string>
     <string name="title_section_about">Acerca</string>
+
+    <!-- Nav Drawer List Item Icons -->
+    <array name="nav_drawer_items">
+        <item>EuMunícipe</item>
+        <item>Novo Aviso</item>
+        <item>Histórico</item>
+        <item>Acerca</item>
+    </array>
+
+    <!-- Keep them in order as the titles are in -->
+    <array name="nav_drawer_icons">
+        <item>@drawable/ic_home</item>
+        <item>@drawable/ic_call</item>
+        <item>@drawable/ic_people</item>
+        <item>@drawable/ic_people</item>
+    </array>
+
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -14,6 +34,16 @@
     <string name="action_settings">Settings</string>
 
     <string name="filename">currentPhoto.png</string>
+
+    <string name="email_subject">EuMunícipe - Novo aviso</string>
+    <string name="email_message">Bom dia,\n\nDe forma a melhorar o vosso município, eu pretendo
+        reportar o seguinte contratempo:\n$0\n\nEm anexo segue uma foto do problema detectado.\n\n
+        As coordenadas aproximadas de GPS do local onde encontei o problema são as
+        seguintes:\n$1\nVer no google maps:\nhttps://www.google.pt/maps/place/$2\n\n\nEnviado através da aplicação EuMunícipe.
+
+    </string>
+
+
 
 
 

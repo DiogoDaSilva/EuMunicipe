@@ -28,7 +28,7 @@
                 android:layout_height="100dp"
                 android:inputType="textMultiLine"
                 android:ems="10"
-                android:id="@+id/editText"
+                android:id="@+id/new_warning_description_edit"
                 android:hint="@string/step_3_description_title"
                 android:layout_margin="10dp"
                 android:background="@drawable/edit_text_design"

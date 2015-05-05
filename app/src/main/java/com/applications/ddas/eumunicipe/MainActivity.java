@@ -16,6 +16,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -62,6 +65,11 @@ public class MainActivity extends ActionBarActivity
 
     private DbManager dbManager;
     public static SQLiteDatabase database;
+
+    public String currentPhotoPath;
+    private LatLng myLocation;
+    private String description;
+    private String municipalityEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,17 +157,17 @@ public class MainActivity extends ActionBarActivity
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment implements View.OnClickListener {
-        /**
+    /*public static class PlaceholderFragment extends Fragment implements View.OnClickListener {
+        *//**
          * The fragment argument representing the section number for this
          * fragment.
-         */
+         *//*
         protected static final String ARG_SECTION_NUMBER = "section_number";
 
-        /**
+        *//**
          * Returns a new instance of this fragment for the given section
          * number.
-         */
+         *//*
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment;
 
@@ -196,12 +204,12 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
-        /**
+        //***
          * Called when a view has been clicked and held.
          *
          * @param v The view that was clicked and held.
          * @return true if the callback consumed the long click, false otherwise.
-         */
+         *//*
         @Override
         public void onClick(View v) {
             FragmentManager fragmentManager = getFragmentManager();
@@ -229,7 +237,7 @@ public class MainActivity extends ActionBarActivity
                     .replace(R.id.container, fragment)
                     .commit();
         }
-    }
+    }*/
 
 
 
@@ -255,7 +263,6 @@ public class MainActivity extends ActionBarActivity
 
         private LayoutInflater inflater;
         private ViewGroup container;
-        private String currentPhotoPath;
         private View newWarningPhotoView;
         private ImageView photoView;
         private Button takePhotoButton;
@@ -319,7 +326,8 @@ public class MainActivity extends ActionBarActivity
             );
 
             // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = image.getAbsolutePath();
+            MainActivity mainActivity = (MainActivity)getActivity();
+            mainActivity.currentPhotoPath = image.getAbsolutePath();
             return image;
         }
 
@@ -332,7 +340,9 @@ public class MainActivity extends ActionBarActivity
                 // Get the dimensions of the bitmap
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                 bmOptions.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+                MainActivity mainActivity = (MainActivity)getActivity();
+                BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
+
                 int photoW = bmOptions.outWidth;
                 int photoH = bmOptions.outHeight;
 
@@ -344,7 +354,7 @@ public class MainActivity extends ActionBarActivity
                 bmOptions.inSampleSize = scaleFactor;
                 bmOptions.inPurgeable = true;
 
-                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+                Bitmap bitmap = BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
                 photoView.setImageBitmap(bitmap);
                 takePhotoButton.setText(R.string.new_warning_take_another_photo);
                 secondStepLayout.setVisibility(View.VISIBLE);
@@ -359,7 +369,7 @@ public class MainActivity extends ActionBarActivity
     /**
      * Created by ddas on 25-03-2015.
      */
-    public static class NewWarningMapFragment extends MainActivity.PlaceholderFragment
+    public static class NewWarningMapFragment extends PlaceholderFragment
             implements OnMapReadyCallback {
 
         private View newWarningMapView;
@@ -372,12 +382,14 @@ public class MainActivity extends ActionBarActivity
         private ImageButton thirdStepButton;
         private boolean animate = true;
         private SQLiteDatabase database;
+        private MainActivity mainActivity;
 
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
+            mainActivity = (MainActivity)getActivity();
             newWarningMapView = inflater.inflate(R.layout.fragment_map_new_warning, container, false);
             county = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_municipality);
             email = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_email);
@@ -453,13 +465,16 @@ public class MainActivity extends ActionBarActivity
                                         + ", " + addresses.get(0).getCountryName();
                                 county.setText(address);
                                 email.setText(mailAndMunicipality[0]);
-
+                                mainActivity.municipalityEmail = mailAndMunicipality[0];
                                 Log.d("DebugMap", address);
                             }
                         }
                     }
 
                     myLocation = new LatLng(location.getLatitude(),location.getLongitude());
+
+                    mainActivity.myLocation = myLocation;
+
                     animateMap(myLocation);
                     thirdStepLayout.setVisibility(View.VISIBLE);
                 }
@@ -481,16 +496,37 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    public static class NewWarningDescriptionFragment extends MainActivity.PlaceholderFragment {
+    public static class NewWarningDescriptionFragment extends PlaceholderFragment {
         private View newWarningDescriptionView;
+        private EditText newWarningDescriptionEdit;
         private ImageButton forthStepButton;
+        private MainActivity mainActivity;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
+            mainActivity = (MainActivity)getActivity();
+
             newWarningDescriptionView = inflater.inflate(R.layout.fragment_description_new_warning,
                     container, false);
+
+            newWarningDescriptionEdit = (EditText) newWarningDescriptionView.findViewById(
+                    R.id.new_warning_description_edit
+            );
+
+            newWarningDescriptionEdit.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    mainActivity.description = newWarningDescriptionEdit.getText().toString();
+                }
+            });
 
             forthStepButton = (ImageButton) newWarningDescriptionView.findViewById(
                     R.id.new_warning_goto_4_step_button);
@@ -499,13 +535,15 @@ public class MainActivity extends ActionBarActivity
 
             return newWarningDescriptionView;
         }
+
+
     }
 
 
 
 
 
-    public static class NewWarningFinalCheckFragment extends MainActivity.PlaceholderFragment
+    public static class NewWarningFinalCheckFragment extends PlaceholderFragment
             implements OnMapReadyCallback {
 
         private View newWarningFinalCheckView;
@@ -515,10 +553,13 @@ public class MainActivity extends ActionBarActivity
         private EditText newWarningFinalCheckEditEmail;
         private EditText newWarningFinalCheckEditDescription;
         private Button sendButton;
+        private MainActivity mainActivity;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
+            mainActivity = (MainActivity)getActivity();
 
             newWarningFinalCheckView = inflater.inflate(R.layout.fragment_new_warning_final_check,
                     container, false);
@@ -532,6 +573,19 @@ public class MainActivity extends ActionBarActivity
             newWarningFinalCheckEditDescription = (EditText) newWarningFinalCheckView.findViewById(
                     R.id.new_warning_final_check_edit_description);
 
+            sendButton = (Button) newWarningFinalCheckView.findViewById(
+                    R.id.send_email
+            );
+
+            //On view create the image does not have yet its dimensions
+            ViewTreeObserver vto = newWarningPhoto.getViewTreeObserver();
+            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                public boolean onPreDraw() {
+                    newWarningPhoto.getViewTreeObserver().removeOnPreDrawListener(this);
+                    initializePhoto();
+                    return true;
+                }
+            });
 
             try {
                 initializeMap();
@@ -539,7 +593,82 @@ public class MainActivity extends ActionBarActivity
                 e.printStackTrace();
             }
 
+            newWarningFinalCheckEditEmail.setText(mainActivity.municipalityEmail);
+
+            newWarningFinalCheckEditDescription.setText(mainActivity.description);
+
+            sendButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String email = "diogothesilva@gmail.com";
+                    String subject = getString(R.string.email_subject);
+                    String message = getString(R.string.email_message);
+
+                    if (mainActivity.description == null) {
+                        mainActivity.description = "";
+                    }
+                    message = message.replace("$0", mainActivity.description);
+
+                    message = message.replace("$1", mainActivity.myLocation.toString());
+
+                    message = message.replace("$2", mainActivity.myLocation.latitude + "," +
+                            mainActivity.myLocation.longitude);
+
+                    message += "\nTeste: " + mainActivity.municipalityEmail;
+
+
+                    final Intent emailIntent = new Intent(
+                            android.content.Intent.ACTION_SEND);
+                    emailIntent.setType("plain/text");
+                    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                            new String[] { email });
+                    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                            subject);
+                    Uri file = Uri.parse("file://" + mainActivity.currentPhotoPath);
+                    emailIntent.putExtra(Intent.EXTRA_STREAM, file);
+
+                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, message);
+                    mainActivity.startActivity(Intent.createChooser(emailIntent,
+                            "Sending email..."));
+
+                    FragmentManager fragmentManager = getFragmentManager();
+                    Fragment fragment = new HomeFragment();
+                    Bundle args = new Bundle();
+                    args.putInt(ARG_SECTION_NUMBER, getArguments().getInt(ARG_SECTION_NUMBER));
+                    fragment.setArguments(args);
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.container, fragment)
+                            .commit();
+                }
+            });
+
             return newWarningFinalCheckView;
+        }
+
+        private void initializePhoto() {
+            // Get the dimensions of the View
+            int targetW = newWarningPhoto.getWidth();
+            int targetH = newWarningPhoto.getHeight();
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+
+            BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
+            bmOptions.inJustDecodeBounds = true;
+
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            // Determine how much to scale down the image
+            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
+            newWarningPhoto.setImageBitmap(bitmap);
         }
 
         private void initializeMap() {
@@ -558,6 +687,13 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onMapReady(GoogleMap googleMap) {
             Log.d("DebugMap", "Entrei");
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            animateMap(mainActivity.myLocation);
+        }
+
+        public void animateMap(LatLng myLocation) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16));
         }
     }
 }
