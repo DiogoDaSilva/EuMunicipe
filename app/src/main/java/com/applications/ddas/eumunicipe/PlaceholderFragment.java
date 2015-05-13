@@ -1,8 +1,6 @@
 package com.applications.ddas.eumunicipe;
 
-/**
- * Created by dsilva on 05-05-2015.
- */
+
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -13,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
+ * Created by dsilva on 05-05-2015.
  * A placeholder fragment containing a simple view.
  */
 public class PlaceholderFragment extends Fragment implements View.OnClickListener {
@@ -31,11 +30,11 @@ public class PlaceholderFragment extends Fragment implements View.OnClickListene
 
         switch(sectionNumber) {
             case 0:
-                fragment = new MainActivity.HomeFragment();
+                fragment = new HomeFragment();
                 break;
 
             case 1:
-                fragment = new MainActivity.NewWarningPhotoFragment();
+                fragment = new NewWarningPhotoFragment();
                 break;
             default:
                 fragment = new PlaceholderFragment();
@@ -66,7 +65,6 @@ public class PlaceholderFragment extends Fragment implements View.OnClickListene
      * Called when a view has been clicked and held.
      *
      * @param v The view that was clicked and held.
-     * @return true if the callback consumed the long click, false otherwise.
      */
     @Override
     public void onClick(View v) {
@@ -75,18 +73,18 @@ public class PlaceholderFragment extends Fragment implements View.OnClickListene
         int id = v.getId();
         switch (id) {
             case R.id.new_warning_goto_2_step_button:
-                fragment = new MainActivity.NewWarningMapFragment();
+                fragment = new NewWarningMapFragment();
                 break;
 
             case R.id.new_warning_goto_3_step_button:
-                fragment = new MainActivity.NewWarningDescriptionFragment();
+                fragment = new NewWarningDescriptionFragment();
                 break;
 
             case R.id.new_warning_goto_4_step_button:
-                fragment = new MainActivity.NewWarningFinalCheckFragment();
+                fragment = new NewWarningFinalCheckFragment();
                 break;
             default:
-                fragment = new MainActivity.HomeFragment();
+                fragment = new HomeFragment();
         }
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, getArguments().getInt(ARG_SECTION_NUMBER));

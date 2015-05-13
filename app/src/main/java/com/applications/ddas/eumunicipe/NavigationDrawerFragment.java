@@ -139,10 +139,6 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        String[] from = { ICON,ITEM,COUNT };
-
-        int[] to = { R.id.icon , R.id.title , R.id.counter};
-
         adapter = new NavDrawerListAdapter(getActionBar().getThemedContext(),
                 navDrawerItems);
 
@@ -288,11 +284,6 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -314,7 +305,7 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * Callbacks interface that all activities using this fragment must implement.
      */
-    public static interface NavigationDrawerCallbacks {
+    public interface NavigationDrawerCallbacks {
         /**
          * Called when an item in the navigation drawer is selected.
          */

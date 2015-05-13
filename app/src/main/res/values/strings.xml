@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">EuMunícipe</string>
 
+
+    <string name="action_bar_color">#673ab7</string>
     <!-- Content Description -->
     <string name="desc_list_item_icon">Item Icon</string>
 
@@ -8,6 +10,12 @@
     <string name="title_section_new_warning">Novo Aviso</string>
     <string name="title_section_history">Histórico</string>
     <string name="title_section_about">Acerca</string>
+
+    <!-- Keep them in order as the titles are in -->
+    <drawable name="icon_home">@drawable/ic_home</drawable>
+    <drawable name="icon_new_warning">@drawable/ic_call</drawable>
+    <drawable name="icon_history">@mipmap/history</drawable>
+    <drawable name="icon_about">@drawable/ic_people</drawable>
 
     <!-- Nav Drawer List Item Icons -->
     <array name="nav_drawer_items">
@@ -20,9 +28,9 @@
     <!-- Keep them in order as the titles are in -->
     <array name="nav_drawer_icons">
         <item>@drawable/ic_home</item>
-        <item>@drawable/ic_call</item>
-        <item>@drawable/ic_people</item>
-        <item>@drawable/ic_people</item>
+        <item>@mipmap/ic_new_warning</item>
+        <item>@mipmap/history</item>
+        <item>@mipmap/ic_about</item>
     </array>
 
 

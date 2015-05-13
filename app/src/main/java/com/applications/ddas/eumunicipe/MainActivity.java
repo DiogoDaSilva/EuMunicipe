@@ -1,14 +1,19 @@
 package com.applications.ddas.eumunicipe;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
@@ -60,6 +65,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    public int mIcon;
 
     FragmentManager fragmentManager;
 
@@ -67,9 +73,9 @@ public class MainActivity extends ActionBarActivity
     public static SQLiteDatabase database;
 
     public String currentPhotoPath;
-    private LatLng myLocation;
-    private String description;
-    private String municipalityEmail;
+    public LatLng myLocation;
+    public String description;
+    public String municipalityEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +105,7 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
+
     public void onSectionAttached(int number) {
         switch (number) {
             case 0:
@@ -114,13 +121,30 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section_about);
                 break;
         }
+
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            switch (number) {
+                case 0:
+                    mIcon = R.drawable.icon_home;
+                    break;
+                case 1:
+                    mIcon = R.drawable.icon_new_warning;
+                    break;
+                case 2:
+                    mIcon = R.drawable.icon_history;
+                    break;
+                case 3:
+                    mIcon = R.drawable.icon_about;
+                    break;
+            }
+        }
     }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(
+                getString(R.string.action_bar_color)))); // set your desired color
     }
 
 
@@ -144,556 +168,6 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
-    }
-
-
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    /*public static class PlaceholderFragment extends Fragment implements View.OnClickListener {
-        *//**
-         * The fragment argument representing the section number for this
-         * fragment.
-         *//*
-        protected static final String ARG_SECTION_NUMBER = "section_number";
-
-        *//**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         *//*
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment;
-
-            switch(sectionNumber) {
-                case 0:
-                    fragment = new HomeFragment();
-                    break;
-
-                case 1:
-                    fragment = new NewWarningPhotoFragment();
-                    break;
-                default:
-                    fragment = new PlaceholderFragment();
-            }
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {}
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
-
-        //***
-         * Called when a view has been clicked and held.
-         *
-         * @param v The view that was clicked and held.
-         * @return true if the callback consumed the long click, false otherwise.
-         *//*
-        @Override
-        public void onClick(View v) {
-            FragmentManager fragmentManager = getFragmentManager();
-            Fragment fragment;
-            int id = v.getId();
-            switch (id) {
-                case R.id.new_warning_goto_2_step_button:
-                    fragment = new NewWarningMapFragment();
-                    break;
-
-                case R.id.new_warning_goto_3_step_button:
-                    fragment = new NewWarningDescriptionFragment();
-                    break;
-
-                case R.id.new_warning_goto_4_step_button:
-                    fragment = new NewWarningFinalCheckFragment();
-                    break;
-                default:
-                    fragment = new HomeFragment();
-            }
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, getArguments().getInt(ARG_SECTION_NUMBER));
-            fragment.setArguments(args);
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, fragment)
-                    .commit();
-        }
-    }*/
-
-
-
-
-
-    public static class HomeFragment extends PlaceholderFragment {
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-            return rootView;
-        }
-    }
-
-
-
-
-
-
-    public static class NewWarningPhotoFragment extends PlaceholderFragment {
-        static final int REQUEST_TAKE_PHOTO = 1;
-
-        private LayoutInflater inflater;
-        private ViewGroup container;
-        private View newWarningPhotoView;
-        private ImageView photoView;
-        private Button takePhotoButton;
-        private RelativeLayout secondStepLayout;
-        private ImageButton secondStepButton;
-
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            newWarningPhotoView = inflater.inflate(R.layout.fragment_photo_new_warning, container, false);
-
-            photoView = (ImageView) newWarningPhotoView.findViewById(R.id.new_warning_photo);
-            takePhotoButton = (Button) newWarningPhotoView.findViewById(R.id.new_warning_photo_button);
-            secondStepLayout = (RelativeLayout) newWarningPhotoView.findViewById(R.id.new_warning_layout_2_step);
-            secondStepButton = (ImageButton) newWarningPhotoView.findViewById(R.id.new_warning_goto_2_step_button);
-
-            takePhotoButton.setOnClickListener( new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    // Ensure that there's a camera activity to handle the intent
-                    Log.d("PHOTO", "Antes do IF");
-                    if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        // Create the File where the photo should go
-                        File photoFile = null;
-                        try {
-                            photoFile = createImageFile();
-                            Log.d("PHOTO2", photoFile.toString());
-                        } catch (IOException ex) {
-                            // Error occurred while creating the File
-                            Log.d("PHOTO_EX", ex.getLocalizedMessage());
-                        }
-                        // Continue only if the File was successfully created
-                        if (photoFile != null) {
-                            Log.d("PHOTO3", photoFile.toString());
-                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                    Uri.fromFile(photoFile));
-                            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                        }
-                    }
-                }
-            });
-
-            secondStepButton.setOnClickListener(this);
-
-            return newWarningPhotoView;
-        }
-
-        private File createImageFile() throws IOException {
-            // Create an image file name
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String imageFileName = "PNG_" + timeStamp + "_";
-            File storageDir = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES);
-            File image = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".png",         /* suffix */
-                    storageDir      /* directory */
-            );
-
-            // Save a file: path for use with ACTION_VIEW intents
-            MainActivity mainActivity = (MainActivity)getActivity();
-            mainActivity.currentPhotoPath = image.getAbsolutePath();
-            return image;
-        }
-
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-                // Get the dimensions of the View
-                int targetW = photoView.getWidth();
-                int targetH = photoView.getHeight();
-
-                // Get the dimensions of the bitmap
-                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                bmOptions.inJustDecodeBounds = true;
-                MainActivity mainActivity = (MainActivity)getActivity();
-                BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
-
-                int photoW = bmOptions.outWidth;
-                int photoH = bmOptions.outHeight;
-
-                // Determine how much to scale down the image
-                int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-                // Decode the image file into a Bitmap sized to fill the View
-                bmOptions.inJustDecodeBounds = false;
-                bmOptions.inSampleSize = scaleFactor;
-                bmOptions.inPurgeable = true;
-
-                Bitmap bitmap = BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
-                photoView.setImageBitmap(bitmap);
-                takePhotoButton.setText(R.string.new_warning_take_another_photo);
-                secondStepLayout.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-
-
-
-
-    /**
-     * Created by ddas on 25-03-2015.
-     */
-    public static class NewWarningMapFragment extends PlaceholderFragment
-            implements OnMapReadyCallback {
-
-        private View newWarningMapView;
-        private SupportMapFragment mapFragment;
-        private GoogleMap googleMap;
-        private LatLng myLocation;
-        private EditText county;
-        private EditText email;
-        private RelativeLayout thirdStepLayout;
-        private ImageButton thirdStepButton;
-        private boolean animate = true;
-        private SQLiteDatabase database;
-        private MainActivity mainActivity;
-
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            mainActivity = (MainActivity)getActivity();
-            newWarningMapView = inflater.inflate(R.layout.fragment_map_new_warning, container, false);
-            county = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_municipality);
-            email = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_email);
-            thirdStepLayout = (RelativeLayout) newWarningMapView.findViewById(R.id.new_warning_layout_3_step);
-            thirdStepButton = (ImageButton) newWarningMapView.findViewById(R.id.new_warning_goto_3_step_button);
-
-            try {
-                initializeMap();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            database = MainActivity.database;
-
-            thirdStepButton.setOnClickListener(this);
-
-            return newWarningMapView;
-        }
-
-        private void initializeMap() {
-            if (googleMap == null) {
-                for(Fragment f : getChildFragmentManager().getFragments()) {
-                    Log.d("debug", "" + f.getId() + " " + f.toString());
-                }
-                SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager()
-                        .findFragmentById(R.id.new_warning_map);
-                mapFragment = supportMapFragment;
-                googleMap = mapFragment.getMap();
-                mapFragment.getMapAsync(this);
-            }
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            initializeMap();
-        }
-
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            Log.d("DebugMap", "Entrei");
-
-            googleMap.setMyLocationEnabled(true);
-            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-            Location location = googleMap.getMyLocation();
-            Log.d("DebugMap", googleMap.toString());
-            googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-
-                @Override
-                public void onMyLocationChange(Location location) {
-                    Geocoder geo = new Geocoder(getActivity().getBaseContext(), Locale.getDefault());
-                    List<Address> addresses = null;
-                    try {
-                        addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 5);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (addresses.isEmpty()) {
-                        county.setText("Waiting for Location");
-                    }
-                    else {
-                        if (addresses.size() > 0) {
-                            String city = addresses.get(0).getSubAdminArea();
-                            for(Address address : addresses) {
-                                Log.d("DebugMap", address.toString());
-                            }
-
-                            if (city != null) {
-                                String[] mailAndMunicipality = DbManager.getEmailAndMunicipality(city);
-                                Log.d("Map", mailAndMunicipality[0] + mailAndMunicipality[1]);
-                                String address = city + ", " + mailAndMunicipality[1]
-                                        + ", " + addresses.get(0).getCountryName();
-                                county.setText(address);
-                                email.setText(mailAndMunicipality[0]);
-                                mainActivity.municipalityEmail = mailAndMunicipality[0];
-                                Log.d("DebugMap", address);
-                            }
-                        }
-                    }
-
-                    myLocation = new LatLng(location.getLatitude(),location.getLongitude());
-
-                    mainActivity.myLocation = myLocation;
-
-                    animateMap(myLocation);
-                    thirdStepLayout.setVisibility(View.VISIBLE);
-                }
-            });
-
-            // check if map is created successfully or not
-            if (googleMap == null) {
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
-
-        public void animateMap(LatLng myLocation) {
-            if (animate) {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 18));
-                animate = false;
-            }
-        }
-    }
-
-    public static class NewWarningDescriptionFragment extends PlaceholderFragment {
-        private View newWarningDescriptionView;
-        private EditText newWarningDescriptionEdit;
-        private ImageButton forthStepButton;
-        private MainActivity mainActivity;
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            mainActivity = (MainActivity)getActivity();
-
-            newWarningDescriptionView = inflater.inflate(R.layout.fragment_description_new_warning,
-                    container, false);
-
-            newWarningDescriptionEdit = (EditText) newWarningDescriptionView.findViewById(
-                    R.id.new_warning_description_edit
-            );
-
-            newWarningDescriptionEdit.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    mainActivity.description = newWarningDescriptionEdit.getText().toString();
-                }
-            });
-
-            forthStepButton = (ImageButton) newWarningDescriptionView.findViewById(
-                    R.id.new_warning_goto_4_step_button);
-
-            forthStepButton.setOnClickListener(this);
-
-            return newWarningDescriptionView;
-        }
-
-
-    }
-
-
-
-
-
-    public static class NewWarningFinalCheckFragment extends PlaceholderFragment
-            implements OnMapReadyCallback {
-
-        private View newWarningFinalCheckView;
-        private ImageView newWarningPhoto;
-        private SupportMapFragment mapFragment;
-        private GoogleMap googleMap;
-        private EditText newWarningFinalCheckEditEmail;
-        private EditText newWarningFinalCheckEditDescription;
-        private Button sendButton;
-        private MainActivity mainActivity;
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            mainActivity = (MainActivity)getActivity();
-
-            newWarningFinalCheckView = inflater.inflate(R.layout.fragment_new_warning_final_check,
-                    container, false);
-
-            newWarningPhoto = (ImageView) newWarningFinalCheckView.findViewById(
-                    R.id.final_check_photo);
-
-            newWarningFinalCheckEditEmail = (EditText) newWarningFinalCheckView.findViewById(
-                    R.id.new_warning_final_check_edit_email);
-
-            newWarningFinalCheckEditDescription = (EditText) newWarningFinalCheckView.findViewById(
-                    R.id.new_warning_final_check_edit_description);
-
-            sendButton = (Button) newWarningFinalCheckView.findViewById(
-                    R.id.send_email
-            );
-
-            //On view create the image does not have yet its dimensions
-            ViewTreeObserver vto = newWarningPhoto.getViewTreeObserver();
-            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                public boolean onPreDraw() {
-                    newWarningPhoto.getViewTreeObserver().removeOnPreDrawListener(this);
-                    initializePhoto();
-                    return true;
-                }
-            });
-
-            try {
-                initializeMap();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            newWarningFinalCheckEditEmail.setText(mainActivity.municipalityEmail);
-
-            newWarningFinalCheckEditDescription.setText(mainActivity.description);
-
-            sendButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String email = "diogothesilva@gmail.com";
-                    String subject = getString(R.string.email_subject);
-                    String message = getString(R.string.email_message);
-
-                    if (mainActivity.description == null) {
-                        mainActivity.description = "";
-                    }
-                    message = message.replace("$0", mainActivity.description);
-
-                    message = message.replace("$1", mainActivity.myLocation.toString());
-
-                    message = message.replace("$2", mainActivity.myLocation.latitude + "," +
-                            mainActivity.myLocation.longitude);
-
-                    message += "\nTeste: " + mainActivity.municipalityEmail;
-
-
-                    final Intent emailIntent = new Intent(
-                            android.content.Intent.ACTION_SEND);
-                    emailIntent.setType("plain/text");
-                    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
-                            new String[] { email });
-                    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
-                            subject);
-                    Uri file = Uri.parse("file://" + mainActivity.currentPhotoPath);
-                    emailIntent.putExtra(Intent.EXTRA_STREAM, file);
-
-                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, message);
-                    mainActivity.startActivity(Intent.createChooser(emailIntent,
-                            "Sending email..."));
-
-                    FragmentManager fragmentManager = getFragmentManager();
-                    Fragment fragment = new HomeFragment();
-                    Bundle args = new Bundle();
-                    args.putInt(ARG_SECTION_NUMBER, getArguments().getInt(ARG_SECTION_NUMBER));
-                    fragment.setArguments(args);
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.container, fragment)
-                            .commit();
-                }
-            });
-
-            return newWarningFinalCheckView;
-        }
-
-        private void initializePhoto() {
-            // Get the dimensions of the View
-            int targetW = newWarningPhoto.getWidth();
-            int targetH = newWarningPhoto.getHeight();
-
-            // Get the dimensions of the bitmap
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-
-            BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
-            bmOptions.inJustDecodeBounds = true;
-
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
-
-            // Determine how much to scale down the image
-            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-
-            Bitmap bitmap = BitmapFactory.decodeFile(mainActivity.currentPhotoPath, bmOptions);
-            newWarningPhoto.setImageBitmap(bitmap);
-        }
-
-        private void initializeMap() {
-            if (googleMap == null) {
-                for(Fragment f : getChildFragmentManager().getFragments()) {
-                    Log.d("debug", "" + f.getId() + " " + f.toString());
-                }
-                SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager()
-                        .findFragmentById(R.id.new_warning_map);
-                mapFragment = supportMapFragment;
-                googleMap = mapFragment.getMap();
-                mapFragment.getMapAsync(this);
-            }
-        }
-
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            Log.d("DebugMap", "Entrei");
-            googleMap.setMyLocationEnabled(true);
-            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            animateMap(mainActivity.myLocation);
-        }
-
-        public void animateMap(LatLng myLocation) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16));
-        }
     }
 }
