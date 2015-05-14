@@ -44,15 +44,52 @@
     <string name="filename">currentPhoto.png</string>
 
     <string name="email_subject">EuMunícipe - Novo aviso</string>
-    <string name="email_message">Bom dia,\n\nDe forma a melhorar o vosso município, eu pretendo
-        reportar o seguinte contratempo:\n$0\n\nEm anexo segue uma foto do problema detectado.\n\n
-        As coordenadas aproximadas de GPS do local onde encontei o problema são as
-        seguintes:\n$1\nVer no google maps:\nhttps://www.google.pt/maps/place/$2\n\n\nEnviado através da aplicação EuMunícipe.
 
+    <string name="email_header">
+        <![CDATA[
+            <!DOCTYPE html>
+            <html>
+            <body>
+        ]]>
     </string>
 
+    <string name="email_footer"><![CDATA[</body></html>"]]></string>
 
+    <string name="email_message_greeting"><![CDATA[<p>Bom dia,</p>]]></string>
 
+    <string name="email_message_no_description">
+        <![CDATA[<p>De forma a melhorar o vosso município, pretendo
+        reportar um problema no vosso município.</p>]]>
+    </string>
+
+    <string name="email_message_description">
+        <![CDATA[
+            <p>De forma a melhorar o vosso município, pretendo reportar o seguinte problema:</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;<b>$</b></p>
+        ]]>
+    </string>
+
+    <string name="email_message_append">
+        <![CDATA[<p>Em anexo segue uma foto do problema detectado.<p>]]>
+    </string>
+
+    <string name="email_message_coordinates">
+        <![CDATA[
+            <p>As coordenadas, aproximadas, de GPS do local onde encontrei
+            o problema são as seguintes:</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;<b>$</b></p>
+        ]]>
+    </string>
+
+    <string name="email_message_cordinates_googlemaps_link">
+        <![CDATA[
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"https://www.google.pt/maps/place/$\">Ver no google maps</a></p>
+        ]]>
+    </string>
+
+    <string name="email_message_sent_from">
+        <![CDATA[<br /><br /><h3>Enviado através da aplicação EuMunícipe.</h3>]]>
+    </string>
 
 
     <string name="step_1_take_photo">1º Passo - Tirar uma foto</string>
@@ -75,8 +112,5 @@
     <string name="step_4_description_title">Descrição:</string>
     <string name="step_4_email_title">Email do município:</string>
     <string name="step_4_send_button">Enviar</string>
-
-
-
 
 </resources>

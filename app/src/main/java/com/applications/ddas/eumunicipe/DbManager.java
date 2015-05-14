@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * Created by ddas on 29-03-2015.
@@ -117,10 +118,7 @@ public class DbManager extends SQLiteOpenHelper {
         return ret;
     }
 
-    public static String[] getEmailAndMunicipality(String city) {
-        if (database == null) {
-            database = MainActivity.database;
-        }
+    public static String[] getEmailAndMunicipality(String city, SQLiteDatabase database) {
         Log.d("Location", city);
         String sql = "SELECT email,name FROM Municipality WHERE name like '%" + city + "%';";
         Log.d("SQL:", sql);
@@ -140,5 +138,19 @@ public class DbManager extends SQLiteOpenHelper {
         Log.d("DB", dbMunicipalityName);
         //}
         return new String[]{dbMunicipalityMail, dbMunicipalityName};
+    }
+
+    public static ArrayList<String> getMunicipalities(SQLiteDatabase database) {
+        ArrayList<String> municipalities = new ArrayList<String>();
+        String sql = "SELECT name FROM Municipality ORDER BY name;";
+        Cursor cursor = database.rawQuery(sql, new String[]{});
+
+        //cursor.moveToFirst();
+        while(cursor.moveToNext()) {
+            municipalities.add(cursor.getString(cursor.getColumnIndexOrThrow("name")));
+        }
+        Log.d("DB", "" + municipalities.size());
+
+        return municipalities;
     }
 }

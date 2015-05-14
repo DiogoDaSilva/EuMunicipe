@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,34 +83,61 @@ public class NewWarningFinalCheckFragment extends PlaceholderFragment
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //E-mail
                 String email = "diogothesilva@gmail.com";
                 String subject = getString(R.string.email_subject);
-                String message = getString(R.string.email_message);
+                String message = getString(R.string.email_header);
+
+                message += getString(R.string.email_message_greeting);
 
                 if (mainActivity.description == null) {
-                    mainActivity.description = "";
+                    message += getString(R.string.email_message_no_description);
+                } else {
+                    String description = getString(R.string.email_message_description);
+                    description = description.replace("$", mainActivity.description);
+                    message += description;
                 }
-                message = message.replace("$0", mainActivity.description);
 
-                message = message.replace("$1", mainActivity.myLocation.toString());
+                String append = getString(R.string.email_message_append);
+                message += append;
 
-                message = message.replace("$2", mainActivity.myLocation.latitude + "," +
-                        mainActivity.myLocation.longitude);
+                String coordinates = getString(R.string.email_message_coordinates);
+                coordinates = coordinates.replace("$", mainActivity.myLocation.toString());
+                message += coordinates;
 
-                message += "\nTeste: " + mainActivity.municipalityEmail;
+                String coordinatesLink = getString(R.string.email_message_cordinates_googlemaps_link);
+                coordinatesLink = coordinatesLink.replace(
+                        "$",
+                        mainActivity.myLocation.latitude + "," + mainActivity.myLocation.longitude
+                );
+                message += coordinatesLink;
 
+                message += getString(R.string.email_message_sent_from);
+
+
+                message += "<p>Teste: " + mainActivity.municipalityEmail + "</p>";
+
+                message += getString(R.string.email_footer);
 
                 final Intent emailIntent = new Intent(
                         android.content.Intent.ACTION_SEND);
-                emailIntent.setType("plain/text");
+                emailIntent.setType("text/html");
+
+                //E-mail recipients
                 emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
                         new String[] { email });
+
+                //E-mail subject
                 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
                         subject);
+
+                //E-mail appended photo
                 Uri file = Uri.parse("file://" + mainActivity.currentPhotoPath);
                 emailIntent.putExtra(Intent.EXTRA_STREAM, file);
 
-                emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, message);
+                //E-mail content
+                emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml(message));
+
                 mainActivity.startActivity(Intent.createChooser(emailIntent,
                         "Sending email..."));
 

@@ -1,18 +1,27 @@
 package com.applications.ddas.eumunicipe;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.Layout;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,6 +31,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,23 +45,24 @@ public class NewWarningMapFragment extends PlaceholderFragment
     private SupportMapFragment mapFragment;
     private GoogleMap googleMap;
     private LatLng myLocation;
-    private EditText county;
-    private EditText email;
+    private TextView municipality;
+    private TextView email;
     private RelativeLayout thirdStepLayout;
     private ImageButton thirdStepButton;
     private boolean animate = true;
     private SQLiteDatabase database;
     private MainActivity mainActivity;
+    private ArrayList<String> municipalities;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
 
         mainActivity = (MainActivity)getActivity();
         newWarningMapView = inflater.inflate(R.layout.fragment_new_warning_map, container, false);
-        county = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_municipality);
-        email = (EditText) newWarningMapView.findViewById(R.id.new_warning_map_edit_email);
+        municipality = (TextView) newWarningMapView.findViewById(R.id.new_warning_map_edit_municipality);
+        email = (TextView) newWarningMapView.findViewById(R.id.new_warning_map_edit_email);
         thirdStepLayout = (RelativeLayout) newWarningMapView.findViewById(R.id.new_warning_layout_3_step);
         thirdStepButton = (ImageButton) newWarningMapView.findViewById(R.id.new_warning_goto_3_step_button);
 
@@ -62,6 +73,64 @@ public class NewWarningMapFragment extends PlaceholderFragment
         }
 
         database = MainActivity.database;
+
+        municipality.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (municipalities == null || municipalities.size() == 0) {
+                    municipalities = DbManager.getMunicipalities(database);
+                }
+
+                AlertDialog.Builder selectMunicipality = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getLayoutInflater(savedInstanceState);
+                View convertView = (View)inflater.inflate(R.layout.fragment_municipalityitem_list, null);
+                final ListView listView = (ListView) convertView.findViewById(R.id.municipality_list);
+
+                final EditText search = (EditText) convertView.findViewById(R.id.search);
+                search.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        search.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+
+                        int textLength = search.getText().length();
+                        ArrayList<String> arraySort = new ArrayList<String>();
+
+                        for (String municipalityName : municipalities) {
+                            if (textLength <= municipalityName.length()) {
+                                if (municipalityName.toLowerCase()
+                                        .contains(search.getText().toString().toLowerCase().trim())) {
+
+                                    arraySort.add(municipalityName);
+                                }
+                            }
+                        }
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                                getActivity(), android.R.layout.select_dialog_singlechoice, arraySort);
+                        listView.setAdapter(adapter);
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        getActivity(), android.R.layout.select_dialog_singlechoice, municipalities);
+                listView.setAdapter(adapter);
+                selectMunicipality.setView(convertView);
+
+                selectMunicipality.show();
+            }
+        });
+
 
         thirdStepButton.setOnClickListener(this);
 
@@ -107,7 +176,7 @@ public class NewWarningMapFragment extends PlaceholderFragment
                     e.printStackTrace();
                 }
                 if (addresses != null && addresses.isEmpty()) {
-                    county.setText("Waiting for Location");
+                    municipality.setText("Waiting for Location");
                 }
                 else {
                     if (addresses != null && addresses.size() > 0) {
@@ -117,11 +186,12 @@ public class NewWarningMapFragment extends PlaceholderFragment
                         }
 
                         if (city != null) {
-                            String[] mailAndMunicipality = DbManager.getEmailAndMunicipality(city);
+                            String[] mailAndMunicipality =
+                                    DbManager.getEmailAndMunicipality(city, database);
                             Log.d("Map", mailAndMunicipality[0] + mailAndMunicipality[1]);
                             String address = city + ", " + mailAndMunicipality[1]
                                     + ", " + addresses.get(0).getCountryName();
-                            county.setText(address);
+                            municipality.setText(address);
                             email.setText(mailAndMunicipality[0]);
                             mainActivity.municipalityEmail = mailAndMunicipality[0];
                             Log.d("DebugMap", address);

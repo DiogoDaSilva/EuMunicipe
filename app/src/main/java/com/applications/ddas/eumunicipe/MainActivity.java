@@ -143,8 +143,6 @@ public class MainActivity extends ActionBarActivity
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(
-                getString(R.string.action_bar_color)))); // set your desired color
     }
 
 
