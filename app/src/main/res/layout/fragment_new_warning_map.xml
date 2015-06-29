@@ -61,23 +61,24 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="30dp">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/new_warning_map_county_name"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center"
+            />
 
-        <TextView android:id="@+id/new_warning_map_edit_municipality"
+        <Button
+            android:id="@+id/new_warning_map_select_municipality"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:hint="Seleccionar município"
+            android:layout_height="wrap_content"
+            android:hint="@string/select_municipality"
             android:gravity="center"
-
-        />
+            />
 
     </LinearLayout>
 
