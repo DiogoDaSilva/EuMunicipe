@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -81,10 +82,10 @@ public class NewWarningMapFragment extends PlaceholderFragment
                 if (municipalities == null || municipalities.size() == 0) {
                     municipalities = DbManager.getMunicipalities(database);
                 }
-
-                AlertDialog.Builder selectMunicipality = new AlertDialog.Builder(getActivity());
+                //AlertDialog OptionDialog = new AlertDialog.Builder(this).create();
+                final AlertDialog selectMunicipality = new AlertDialog.Builder(getActivity()).create();
                 LayoutInflater inflater = getLayoutInflater(savedInstanceState);
-                View convertView = (View)inflater.inflate(R.layout.fragment_municipalityitem_list, null);
+                final View convertView = (View)inflater.inflate(R.layout.fragment_municipalityitem_list, null);
                 final ListView listView = (ListView) convertView.findViewById(R.id.municipality_list);
 
                 final EditText search = (EditText) convertView.findViewById(R.id.search);
@@ -125,6 +126,22 @@ public class NewWarningMapFragment extends PlaceholderFragment
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                         getActivity(), android.R.layout.select_dialog_singlechoice, municipalities);
                 listView.setAdapter(adapter);
+
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String city = (String) parent.getItemAtPosition(position);
+
+                        Log.d("item", city.toString());
+
+                        setMunicipalityProperties(city, "PT"); //TODO
+
+                        selectMunicipality.dismiss();
+
+                        thirdStepLayout.setVisibility(View.VISIBLE);
+                    }
+                });
+
                 selectMunicipality.setView(convertView);
 
                 selectMunicipality.show();
@@ -180,22 +197,14 @@ public class NewWarningMapFragment extends PlaceholderFragment
                 }
                 else {
                     if (addresses != null && addresses.size() > 0) {
-                        String city = addresses.get(0).getSubAdminArea();
                         for(Address address : addresses) {
                             Log.d("DebugMap", address.toString());
                         }
 
-                        if (city != null) {
-                            String[] mailAndMunicipality =
-                                    DbManager.getEmailAndMunicipality(city, database);
-                            Log.d("Map", mailAndMunicipality[0] + mailAndMunicipality[1]);
-                            String address = city + ", " + mailAndMunicipality[1]
-                                    + ", " + addresses.get(0).getCountryName();
-                            municipality.setText(address);
-                            email.setText(mailAndMunicipality[0]);
-                            mainActivity.municipalityEmail = mailAndMunicipality[0];
-                            Log.d("DebugMap", address);
-                        }
+                        String city = addresses.get(0).getSubAdminArea();
+                        String country = addresses.get(0).getCountryName();
+
+                        setMunicipalityProperties(city, country);
                     }
                 }
 
@@ -214,6 +223,20 @@ public class NewWarningMapFragment extends PlaceholderFragment
                     "Sorry! unable to create maps", Toast.LENGTH_SHORT)
                     .show();
         }
+    }
+
+    public void setMunicipalityProperties(String city, String country) {
+            if (city != null) {
+                String[] mailAndMunicipality =
+                        DbManager.getEmailAndMunicipality(city, database);
+                Log.d("Map", mailAndMunicipality[0] + mailAndMunicipality[1]);
+                String address = city + ", " + mailAndMunicipality[1]
+                        + ", " + country;
+                municipality.setText(address);
+                email.setText(mailAndMunicipality[0]);
+                mainActivity.municipalityEmail = mailAndMunicipality[0];
+                Log.d("DebugMap", address);
+            }
     }
 
     public void animateMap(LatLng myLocation) {
