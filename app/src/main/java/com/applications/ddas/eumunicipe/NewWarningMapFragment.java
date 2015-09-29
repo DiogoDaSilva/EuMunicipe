@@ -1,15 +1,17 @@
 package com.applications.ddas.eumunicipe;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +21,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -62,7 +63,7 @@ public class NewWarningMapFragment extends PlaceholderFragment
 
         mainActivity = (MainActivity)getActivity();
         newWarningMapView = inflater.inflate(R.layout.fragment_new_warning_map, container, false);
-        municipality = (TextView) newWarningMapView.findViewById(R.id.new_warning_map_edit_municipality);
+        municipality = (TextView) newWarningMapView.findViewById(R.id.new_warning_map_select_municipality);
         email = (TextView) newWarningMapView.findViewById(R.id.new_warning_map_edit_email);
         thirdStepLayout = (RelativeLayout) newWarningMapView.findViewById(R.id.new_warning_layout_3_step);
         thirdStepButton = (ImageButton) newWarningMapView.findViewById(R.id.new_warning_goto_3_step_button);
@@ -72,6 +73,8 @@ public class NewWarningMapFragment extends PlaceholderFragment
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        checkGPS();
 
         database = MainActivity.database;
 
@@ -112,7 +115,7 @@ public class NewWarningMapFragment extends PlaceholderFragment
                         }
 
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                                getActivity(), android.R.layout.select_dialog_singlechoice, arraySort);
+                                getActivity(), R.layout.municipality_item, arraySort);
                         listView.setAdapter(adapter);
 
                     }
@@ -124,7 +127,7 @@ public class NewWarningMapFragment extends PlaceholderFragment
                 });
 
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        getActivity(), android.R.layout.select_dialog_singlechoice, municipalities);
+                        getActivity(), R.layout.municipality_item, municipalities);
                 listView.setAdapter(adapter);
 
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -243,6 +246,23 @@ public class NewWarningMapFragment extends PlaceholderFragment
         if (animate) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 18));
             animate = false;
+        }
+    }
+
+    public void checkGPS() {
+        LocationManager locationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
+        if( !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+            builder.setTitle(R.string.gps_not_found_title);  // GPS not found
+            builder.setMessage(R.string.gps_not_found_message); // Want to enable?
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    mainActivity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                }
+            });
+            builder.setNegativeButton(R.string.no, null);
+            builder.create().show();
+            return;
         }
     }
 }

@@ -5,13 +5,22 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.applications.ddas.eumunicipe.MunicipalityItemFragment">
+    tools:context="com.applications.ddas.eumunicipe.MunicipalityItemFragment"
+    android:gravity="center_horizontal">
 
     <EditText
+        android:drawableLeft="@mipmap/ic_search"
+        android:drawableStart="@mipmap/ic_search"
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleccione o município"/>
+        android:hint="@string/search_municipality"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:paddingBottom="20dp"
+        android:paddingRight="50dp"
+        android:paddingEnd="50dp"
+        />
 
     <ListView
         android:id="@+id/municipality_list"

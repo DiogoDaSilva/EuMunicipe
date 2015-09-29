@@ -142,7 +142,7 @@ public class DbManager extends SQLiteOpenHelper {
 
     public static ArrayList<String> getMunicipalities(SQLiteDatabase database) {
         ArrayList<String> municipalities = new ArrayList<String>();
-        String sql = "SELECT name FROM Municipality ORDER BY name;";
+        String sql = "SELECT name FROM Municipality ORDER BY name COLLATE UNICODE;";
         Cursor cursor = database.rawQuery(sql, new String[]{});
 
         //cursor.moveToFirst();

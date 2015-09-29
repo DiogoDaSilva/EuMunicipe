@@ -101,6 +101,12 @@
     <string name="new_warning_map_county_name">Município:</string>
     <string name="new_warning_map_county_email">E-mail:</string>
     <string name="new_warning_goto_3_step">3º Passo</string>
+    <string name="select_municipality">Seleccione o município</string>
+    <string name="search_municipality">Procurar município</string>
+
+    <string name="gps_not_found_title">O GPS não está activado</string>
+    <string name="gps_not_found_message">Quer ligá-lo?\nSe não quiser ligá-lo terá de seleccionar o município.</string>
+
 
     <string name="step_3_insert_description">3º Passo - Inserir uma descrição\n(opcional)</string>
     <string name="step_3_description_title">Breve descrição do problema.</string>
@@ -112,5 +118,10 @@
     <string name="step_4_description_title">Descrição:</string>
     <string name="step_4_email_title">Email do município:</string>
     <string name="step_4_send_button">Enviar</string>
+
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+
+
 
 </resources>
